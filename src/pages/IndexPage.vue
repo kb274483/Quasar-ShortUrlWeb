@@ -74,16 +74,18 @@ const clearURLInput = () => {
 }
 // 複製短網址
 const copyUrl = () => {
-  navigator.clipboard.writeText(resultUrl.value).then(()=>{
+  navigator.clipboard.write([new ClipboardItem({ "text/plain": new Blob([resultUrl.value], { type: "text/plain" }) })])
+  .then(() => {
     alertTitle.value = 'Success'
     alertMessage.value = 'Copied to clipboard'
     alert.value = true
-  }).catch((err)=>{
-    console.log(err)
+  })
+  .catch((err) => {
+    console.log(err);
     alertTitle.value = 'Warning'
     alertMessage.value = 'Copy failed，Http does not support'
     alert.value = true
-  })
+  });
 }
 </script>
 
