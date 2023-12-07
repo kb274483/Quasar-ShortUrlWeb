@@ -74,7 +74,7 @@ const clearURLInput = () => {
 }
 // 複製短網址
 const copyUrl = () => {
-  if(navigator.clipboard.writeText()){
+  if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(resultUrl.value).then(()=>{
       alertTitle.value = 'Success'
       alertMessage.value = 'Copied to clipboard'
