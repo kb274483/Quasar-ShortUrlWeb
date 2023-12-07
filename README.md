@@ -1,3 +1,6 @@
+# 試玩一下Quasar
+主要目的試用Quasar，建立一個簡單的頁面，POST網址給自己的Golang server取回短網址並顯示。
+
 # Quasar App (quasat-app)
 
 A Quasar Project
