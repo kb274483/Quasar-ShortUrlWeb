@@ -74,10 +74,16 @@ const clearURLInput = () => {
 }
 // 複製短網址
 const copyUrl = () => {
-  navigator.clipboard.writeText(resultUrl.value)
-  alertTitle.value = 'Success'
-  alertMessage.value = 'Copied to clipboard'
-  alert.value = true
+  navigator.clipboard.writeText(resultUrl.value).then(()=>{
+    alertTitle.value = 'Success'
+    alertMessage.value = 'Copied to clipboard'
+    alert.value = true
+  }).catch((err)=>{
+    console.log(err)
+    alertTitle.value = 'Warning'
+    alertMessage.value = 'Copy failed，Http does not support'
+    alert.value = true
+  })
 }
 </script>
 
