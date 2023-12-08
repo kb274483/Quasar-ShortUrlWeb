@@ -4,7 +4,7 @@
     <q-header elevated class="bg-grey-6 text-white" height-hint="98">
       <q-toolbar>
         <q-toolbar-title>
-          Short Url Service
+          Shorten Url Service
         </q-toolbar-title>
       </q-toolbar>
 
