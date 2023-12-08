@@ -5,7 +5,7 @@
       <q-btn flat style="color: #FF0080" label="Generate" @click="generate()" />
     </div>
     <div class="flex justify-center q-mt-lg">
-      <div class="resultContainer" :style="{'padding:10px' : getResult }">
+      <div class="resultContainer">
         <q-slide-transition>
           <div v-show="getResult">
             <div class="flex justify-between items-center">
