@@ -49,7 +49,7 @@ const getResult = ref(false)
 const generate = () => {
   if(isValidUrl(url.value)){
     // 13.115.250.182/
-    Axios.post('http://13.115.250.182/url_api/generate_short_url',{url:url.value}
+    Axios.post('https://brief-url.link/url_api/generate_short_url',{url:url.value}
     ).then((res)=>{
       url.value = ''
       resultUrl.value = res.data.short_url
