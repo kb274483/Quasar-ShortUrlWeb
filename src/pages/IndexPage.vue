@@ -5,7 +5,7 @@
       <q-btn flat style="color: #FF0080" label="Generate" @click="generate()" />
     </div>
     <div class="flex justify-center q-mt-lg">
-      <div class="resultContainer">
+      <div class="resultContainer" :style="{'padding:10px' : getResult }">
         <q-slide-transition>
           <div v-show="getResult">
             <div class="flex justify-between items-center">
@@ -108,7 +108,6 @@ const copyUrl = () => {
   width: 60%; 
   border: 1px solid $grey-3;
   border-radius: 5px;
-  padding: 10px;
   background-color: $grey-1;
   @media screen and (max-width: $breakpoint-xs-max) {
     width: 95% ;
