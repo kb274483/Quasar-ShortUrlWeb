@@ -3,7 +3,21 @@
     <q-btn color="white" text-color="orange" class="tw-text-lg"
       unelevated to="/" label="<Back" no-caps
     />
-
+    <div class="tw-flex tw-justify-center">
+      <div class="tw-w-3/4 tw-border tw-shadow-inner tw-rounded tw-p-4">
+        <p class="tw-text-gray-600 tw-text-xl tw-text-center">Your History Record</p>
+        <q-list bordered class="tw-rounded tw-shadow-inner">
+          <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200"
+            v-for="item in historyArr" :key="item.ID.S"
+          >
+            <div class="tw-flex tw-gap-4 tw-items-center">
+              <span>{{item.Date.S}}</span>
+              <span>https://brief-url.link/url_api/{{item.ID.S}}</span>
+            </div>
+          </q-item>
+        </q-list>
+      </div>
+    </div>
     <q-dialog v-model="alert">
       <q-card style="min-width: 350px">
         <q-card-section>
@@ -32,6 +46,7 @@ const alert = ref(false)
 const alertMessage = ref('')
 const alertTitle = ref('')
 const userName = computed(() => vuexStore.state.module.userName);
+const historyArr = ref([])
 
 onMounted(() => {
   api.post(API_ENDPOINTS.GET_MEMBER_HISTORY,{user:userName.value}
