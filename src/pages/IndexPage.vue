@@ -20,7 +20,7 @@
       </div>
     </div>
     <q-dialog v-model="alert">
-      <q-card>
+      <q-card style="min-width: 350px">
         <q-card-section>
           <div class="text-h6 text-red-4">{{alertTitle}}</div>
         </q-card-section>
@@ -36,20 +36,23 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import Axios from 'axios'
+import { computed, onMounted, ref } from 'vue'
+import {useStore} from 'vuex';
+import api from 'src/api/axios';
+import { API_ENDPOINTS } from 'src/api/index';
 
+const vuexStore = useStore()
 const alert = ref(false)
 const alertMessage = ref('')
 const alertTitle = ref('')
 const url = ref('')
 const resultUrl = ref('')
 const getResult = ref(false)
+const userName = computed(() => vuexStore.state.module.userName);
 // 透過API產生短網址
 const generate = () => {
   if(isValidUrl(url.value)){
-    // 13.115.250.182/
-    Axios.post('https://brief-url.link/url_api/generate_short_url',{url:url.value}
+    api.post(API_ENDPOINTS.GENERATE_SHORTEN_URL,{url:url.value,user:userName.value}
     ).then((res)=>{
       url.value = ''
       resultUrl.value = res.data.short_url
