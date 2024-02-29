@@ -4,7 +4,7 @@ export const API_ENDPOINTS = {
   // 登入
   LOGIN : `/login`,
   // 新增會員
-  CREATEMEMBER : `/create_member`,
+  CREATE_MEMBER : `/create_member`,
   // 取得會員紀錄
   GET_MEMBER_HISTORY : `/member_history`
 };

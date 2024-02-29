@@ -5,6 +5,15 @@
 再將資料儲存於 AWS dynamoDB。
 後續為了讓整體看起來更完整一些，使用Aws Route53購買了最便宜的網域，以及加上SSL憑證。
 
+最近想為這個網站增加點功能，並針對API做統一管理以及新增Axios攔截器，處理JWT token
+目前是將JWT Token儲存在Vuex之中，並且沒有做持久化處理，所以當重新整理後就會登出並回到首頁
+
+目前增加功能有：
+* 新增登入者
+* 增加登入功能
+* 登入後便可以查詢該帳號過往使用過短網址紀錄
+
+
 # Quasar App (quasat-app)
 
 A Quasar Project

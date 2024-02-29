@@ -1,5 +1,17 @@
 <template>
   <q-layout view="hHh lpR fFf">
+    
+    <!-- Loading -->
+    <div v-if="isLoading" 
+      class="tw-absolute tw-z-50 tw-top-0 tw-left-0 tw-w-full tw-h-[100vh] tw-flex tw-justify-center tw-items-center tw-bg-gray-900 tw-opacity-30"
+    >
+      <q-circular-progress
+        indeterminate
+        size="50px"
+        color="deep-orange"
+        class="q-ma-md"
+      />
+    </div>
 
     <q-header elevated class="bg-grey-6 text-white" height-hint="98">
       <q-toolbar>
@@ -38,10 +50,22 @@
     <!-- 登入彈窗 -->
     <q-dialog persistent v-model="isUserLoginCtl">
       <q-card style="min-width: 350px">
+        <div class="tw-flex tw-justify-end">
+          <q-btn flat label="Create new member" size="sm" v-if="!isCreateMemberCtl"
+            class="tw-text-gray-500" @click="isCreateMemberCtl = true" 
+          />
+        </div>
         <q-card-section>
-          <div class="text-h5 text-center">Login</div>
+          <div class="q-mx-auto tw-w-60 text-h5 text-center tw-text-gray-600">
+            {{isCreateMemberCtl ? 'Create New Account':'Login'}}
+          </div>
         </q-card-section>
 
+        <p v-if="isCreateMemberCtl"
+          class="q-mx-auto tw-w-60 tw-text-xs tw-text-gray-500"
+        >
+          Please enter your account, case sensitive
+        </p>
         <q-input class="q-mx-auto tw-w-60" color="orange" filled 
           v-model="memberData.account" label="Account"
         >
@@ -61,9 +85,10 @@
           </template>
         </q-input>
 
-        <q-card-actions align="right" class="text-red">
-          <q-btn flat label="Cancel" v-close-popup @click="clear()" />
-          <q-btn flat label="Login" @click="login()" />
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" @click="clear()" color="red" />
+          <q-btn flat label="Login" @click="login()" color="blue" v-if="!isCreateMemberCtl" />
+          <q-btn flat label="Create" @click="createMember()" color="blue" v-else />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -72,7 +97,7 @@
     <q-dialog v-model="popup">
       <q-card style="min-width: 350px">
         <q-card-section>
-          <div class="text-h6">Message</div>
+          <div class="text-h6">{{popupTitle}}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -86,7 +111,7 @@
     </q-dialog>
 
     <q-page-container>
-      <router-view />
+      <router-view @emitLoading="loadingHandler" @emitPopup="popupHandler" />
     </q-page-container>
   </q-layout>
 </template>
@@ -149,6 +174,7 @@ export default defineComponent({
   },
 
   setup () {
+    const isLoading = ref(false)
     const vuexStore = useStore()
     const isLoginStatus = computed(() => vuexStore.state.module.isLoginStatus);
     const loginUserName = computed(() => vuexStore.state.module.userName);
@@ -160,13 +186,47 @@ export default defineComponent({
     })
     // 右側選單開關
     const rightDrawerOpen = ref(false)
+    // 新增會員彈窗控制
+    const isCreateMemberCtl = ref(false)
+    const createMember = ()=>{
+      if(memberData.value.account === '' || memberData.value.password === ''){
+        popupHandler({
+          popup: true,
+          popupTitle: 'Warning',
+          popupMessage: 'Please enter account and password'
+        })
+        return
+      }
+      api.post(API_ENDPOINTS.CREATE_MEMBER,memberData.value).then((res)=>{
+        if(res.status === 200){
+          popupHandler({
+            popup: true,
+            popupTitle: 'Success',
+            popupMessage: res.data.msg
+          })
+          isCreateMemberCtl.value = false
+          memberData.value.account = ''
+          memberData.value.password = ''
+        }
+      }).catch((err)=>{
+        console.log(err)
+        popupHandler({
+          popup: true,
+          popupTitle: 'Error',
+          popupMessage: `${err.response.statusText}-${err.response.data.error}`
+        })
+      })
+    }
     // 登入視窗控制
     const isUserLoginCtl = ref(false)
     // 登入
     const login = () => {
       if(memberData.value.account === '' || memberData.value.password === ''){
-        popupMessage.value = 'Please enter account and password'
-        popup.value = true
+        popupHandler({
+          popup: true,
+          popupTitle: 'Warning',
+          popupMessage: 'Please enter account and password'
+        })
         return
       }
       api.post(API_ENDPOINTS.LOGIN,memberData.value).then((res)=>{
@@ -175,37 +235,64 @@ export default defineComponent({
           vuexStore.commit('module/setJWTToken', res.data.token);
           vuexStore.commit('module/setUserName', res.data.user_name);
           isUserLoginCtl.value = false
-          popupMessage.value = res.data.msg
-          popup.value = true
+          popupHandler({
+            popup: true,
+            popupTitle: 'Success',
+            popupMessage: res.data.msg
+          })
         }
       }).catch((err)=>{
         console.log(err)
         vuexStore.commit('module/setLoginStatus', false);
         isUserLoginCtl.value = false
-        popupMessage.value = `${err.response.statusText}-${err.response.data.error}`
-        popup.value = true
+        popupHandler({
+          popup: true,
+          popupTitle: 'Error',
+          popupMessage: `${err.response.statusText}-${err.response.data.error}`
+        })
       })
     }
     // 清空欄位
     const clear = ()=>{
+      if(isCreateMemberCtl.value){
+        isCreateMemberCtl.value = false
+      }else{
+        isUserLoginCtl.value = false
+      }
       memberData.value.account = ''
       memberData.value.password = ''
     }
     // 訊息彈窗
     const popup = ref(false)
     const popupMessage = ref('')
+    const popupTitle = ref('')
+    // Loading
+    const loadingHandler = (status) => {
+      isLoading.value = status
+    }
+    const popupHandler = (status) =>{
+      popup.value = status.popup
+      popupTitle.value = status.popupTitle
+      popupMessage.value = status.popupMessage
+    }
     return {
       essentialLinks: linksList,
+      isLoading,
       popup,
+      popupTitle,
       popupMessage,
       isLoginStatus,
+      isCreateMemberCtl,
       isUserLoginCtl,
       loginUserName,
       isPwd,
       memberData,
       rightDrawerOpen,
+      createMember,
       login,
       clear,
+      popupHandler,
+      loadingHandler,
       toggleRightDrawer () {
         rightDrawerOpen.value = !rightDrawerOpen.value
       }

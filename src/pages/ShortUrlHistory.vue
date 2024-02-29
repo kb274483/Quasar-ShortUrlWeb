@@ -6,32 +6,33 @@
     <div class="tw-flex tw-justify-center">
       <div class="tw-w-3/4 tw-border tw-shadow-inner tw-rounded tw-p-4">
         <p class="tw-text-gray-600 tw-text-xl tw-text-center">Your History Record</p>
-        <q-list bordered class="tw-rounded tw-shadow-inner">
+        <q-list bordered class="tw-rounded tw-shadow-inner tw-mt-4">
+          <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200">
+            <div class="tw-w-full tw-grid tw-grid-cols-5 tw-gap-4 tw-place-items-center">
+              <span>日期</span>
+              <span class="tw-col-span-2">短網址</span>
+              <span>連結</span>
+              <span>複製</span>
+            </div>
+          </q-item>
           <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200"
             v-for="item in historyArr" :key="item.ID.S"
           >
-            <div class="tw-flex tw-gap-4 tw-items-center">
+            <div class="tw-w-full tw-grid tw-grid-cols-5 tw-gap-4 tw-place-items-center">
               <span>{{item.Date.S}}</span>
-              <span>https://brief-url.link/url_api/{{item.ID.S}}</span>
+              <span class="tw-col-span-2">https://brief-url.link/url_api/{{item.ID.S}}</span>
+              <q-btn color="white" text-color="orange" class="tw-text-lg" target="_blank"
+                unelevated :href="`https://brief-url.link/url_api/${item.ID.S}`" 
+                icon="link"
+              />
+              <q-btn color="white" text-color="orange" class="tw-text-base"
+                unelevated icon="content_copy" @click="copyUrl(item.ID.S)"
+              />
             </div>
           </q-item>
         </q-list>
       </div>
     </div>
-    <q-dialog v-model="alert">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6 text-red-4">{{alertTitle}}</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          {{alertMessage}}
-        </q-card-section>
-        <q-card-actions align="right" >
-          <q-btn flat label="OK" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
   </q-page>
 </template>
 
@@ -41,21 +42,42 @@ import {useStore} from 'vuex';
 import api from 'src/api/axios';
 import { API_ENDPOINTS } from 'src/api/index';
 
+const emit = defineEmits(['emit-loading','emit-popup']);
 const vuexStore = useStore()
-const alert = ref(false)
-const alertMessage = ref('')
-const alertTitle = ref('')
 const userName = computed(() => vuexStore.state.module.userName);
 const historyArr = ref([])
+const isLoading = ref(false)
 
 onMounted(() => {
+  emit('emit-loading', true)
+  getHistory()
+})
+// 取得歷史紀錄
+const getHistory = () => {
   api.post(API_ENDPOINTS.GET_MEMBER_HISTORY,{user:userName.value}
-  ).then((res)=>{
-    console.log(res.data)
-    historyArr.value = res.data.data.Items
+  ).then((res)=>{ 
+    historyArr.value = res.data.data.Items.reverse()
+    emit('emit-loading', false)
   }).catch((err)=>{
     console.log(err)
+    emit('emit-loading', false)
   })
-})
-
+}
+// 複製短網址
+const copyUrl = (copyValue) => {
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(`https://brief-url.link/url_api/${copyValue}`).then(()=>{
+      emit('emit-popup', {popupTitle: 'Success', popupMessage: 'Copied to clipboard', popup: true})
+    }).catch((err)=>{
+      console.log(err)
+      emit('emit-popup',
+        {popupTitle: 'Warning', popupMessage: 'Copy failed，Http does not support', popup: true}
+      )
+    })
+  }else{
+    emit('emit-popup', 
+      {popupTitle: 'Warning', popupMessage: 'Copy failed，Http does not support', popup: true}
+    )
+  } 
+}
 </script>
