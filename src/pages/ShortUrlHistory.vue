@@ -8,19 +8,21 @@
         <p class="tw-text-gray-600 tw-text-xl tw-text-center">Your History Record</p>
         <q-list bordered class="tw-rounded tw-shadow-inner tw-mt-4">
           <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200">
-            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-5 tw-gap-4 tw-place-items-center">
-              <span class="tw-col-span-2 md:tw-col-span-1">日期</span>
-              <span class="tw-col-span-2 tw-hidden md:tw-block">短網址</span>
-              <span>連結</span>
-              <span>複製</span>
+            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-4 tw-place-items-center">
+              <span class="tw-col-span-2 md:tw-col-span-1">Date</span>
+              <span class="tw-col-span-3 tw-hidden md:tw-block">Original</span>
+              <span>Link</span>
+              <span>Copy</span>
             </div>
           </q-item>
           <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200"
             v-for="item in historyArr" :key="item.ID.S"
           >
-            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-5 tw-gap-4 tw-place-items-center">
+            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-4 tw-place-items-center">
               <span class="tw-col-span-2 md:tw-col-span-1">{{item.Date.S}}</span>
-              <span class="tw-col-span-2 tw-hidden md:tw-block">https://brief-url.link/url_api/{{item.ID.S}}</span>
+              <span class="tw-w-full tw-text-balance tw-col-span-3 tw-hidden md:tw-block">
+                {{item.Url.S}}
+              </span>
               <q-btn color="white" text-color="orange" class="tw-text-lg" target="_blank"
                 unelevated :href="`https://brief-url.link/url_api/${item.ID.S}`" 
                 icon="link"
