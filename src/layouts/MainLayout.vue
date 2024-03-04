@@ -24,6 +24,7 @@
         <div class="tw-flex tw-justify-center tw-items-center tw-border tw-border-white tw-px-2 tw-rounded tw-bg-white tw-text-gray-600 hover:tw-bg-gray-200" v-else>
           <q-btn disable dense flat round icon="insert_emoticon" size="1.3rem" />
           <p class="tw-text-xl tw-uppercase">{{loginUserName}}</p>
+          <q-btn dense flat round icon="logout" size="1.3rem" @click="checkLogout" />
         </div>
         <q-btn dense flat round icon="menu" @click="toggleRightDrawer()" size="1.3rem" />
       </q-toolbar>
@@ -104,7 +105,11 @@
           {{popupMessage}}
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-card-actions align="right" v-if="isLogout">
+          <q-btn flat label="No" color="gary" v-close-popup />
+          <q-btn flat label="Yes" color="red" @click="logout()" />
+        </q-card-actions>
+        <q-card-actions align="right" v-else>
           <q-btn flat label="OK" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
@@ -117,7 +122,7 @@
 </template>
 
 <script >
-import { defineComponent, ref,computed, onMounted } from 'vue'
+import { defineComponent, ref,computed, onBeforeUnmount, onMounted } from 'vue'
 import {useStore} from 'vuex';
 import EssentialLink from 'components/EssentialLink.vue'
 import api from 'src/api/axios';
@@ -178,6 +183,7 @@ export default defineComponent({
     const vuexStore = useStore()
     const isLoginStatus = computed(() => vuexStore.state.module.isLoginStatus);
     const loginUserName = computed(() => vuexStore.state.module.userName);
+    const isLogout = ref(false)
     const isPwd = ref(true)
     // 用戶登入資料
     const memberData = ref({
@@ -252,6 +258,21 @@ export default defineComponent({
         })
       })
     }
+    // 登出
+    const checkLogout = ()=>{
+      isLogout.value = true
+      popupHandler({
+        popup: true,
+        popupTitle: 'Warning',
+        popupMessage: 'Are you sure to logout?'
+      })
+    }
+    const logout = ()=>{
+      vuexStore.commit('module/setLogout')
+      isLogout.value = false
+      popup.value = false
+      window.location.href = '/'
+    }
     // 清空欄位
     const clear = ()=>{
       if(isCreateMemberCtl.value){
@@ -275,6 +296,18 @@ export default defineComponent({
       popupTitle.value = status.popupTitle
       popupMessage.value = status.popupMessage
     }
+    const beforeUnload = ()=>{
+      vuexStore.commit('module/setLocalStorage')
+    }
+
+    onMounted(() => {
+      window.addEventListener('beforeunload', beforeUnload);
+    })
+
+    onBeforeUnmount(() => {
+      window.removeEventListener('beforeunload', beforeUnload);
+    })
+
     return {
       essentialLinks: linksList,
       isLoading,
@@ -282,6 +315,7 @@ export default defineComponent({
       popupTitle,
       popupMessage,
       isLoginStatus,
+      isLogout,
       isCreateMemberCtl,
       isUserLoginCtl,
       loginUserName,
@@ -290,9 +324,12 @@ export default defineComponent({
       rightDrawerOpen,
       createMember,
       login,
+      logout,
+      checkLogout,
       clear,
       popupHandler,
       loadingHandler,
+      beforeUnload,
       toggleRightDrawer () {
         rightDrawerOpen.value = !rightDrawerOpen.value
       }

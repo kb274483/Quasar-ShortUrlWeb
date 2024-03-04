@@ -1,10 +1,10 @@
 <template>
   <q-page class="">
-    <div class="flex justify-center q-mt-lg">
+    <div class="flex justify-center tw-py-4">
       <q-input outlined v-model="url" label="Enter your URL" style="width:50%;"/>
       <q-btn flat style="color: #FF0080" label="Generate" @click="generate()" />
     </div>
-    <div class="flex justify-center q-mt-lg">
+    <div class="flex justify-center tw-py-4">
       <div class="resultContainer">
         <q-slide-transition>
           <div v-show="getResult">
