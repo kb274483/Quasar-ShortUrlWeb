@@ -24,7 +24,7 @@
         <div class="tw-flex tw-justify-center tw-items-center tw-border tw-border-white tw-px-2 tw-rounded tw-bg-white tw-text-gray-600 hover:tw-bg-gray-200" v-else>
           <q-btn disable dense flat round icon="insert_emoticon" size="1.3rem" />
           <p class="tw-text-xl tw-uppercase">{{loginUserName}}</p>
-          <q-btn dense flat round icon="logout" size="1.3rem" @click="checkLogout" />
+          <q-btn dense flat round icon="logout" size="1rem" @click="checkLogout" />
         </div>
         <q-btn dense flat round icon="menu" @click="toggleRightDrawer()" size="1.3rem" />
       </q-toolbar>
@@ -85,7 +85,12 @@
             />
           </template>
         </q-input>
-
+        <q-card-actions align="right">
+          <q-icon name="fa-brands fa-google" class="tw-text-blue-400" />
+          <q-btn flat label="login with google" no-caps
+            class="tw-text-gray-600" @click="loginWithGoogle()"  
+          />
+        </q-card-actions>
         <q-card-actions align="right">
           <q-btn flat label="Cancel" @click="clear()" color="red" />
           <q-btn flat label="Login" @click="login()" color="blue" v-if="!isCreateMemberCtl" />
@@ -258,6 +263,19 @@ export default defineComponent({
         })
       })
     }
+    // google OAuth登入
+    const loginWithGoogle = ()=>{
+      api.get(API_ENDPOINTS.GOOGLE_LOGIN).then((res)=>{
+        if(res.status === 200) window.location.href = res.data.redirectUrl
+      }).catch((err)=>{
+        console.log(err)
+        popupHandler({
+          popup: true,
+          popupTitle: 'Error',
+          popupMessage: `${err.response.statusText}-${err.response.data.error}`
+        })
+      })
+    }
     // 登出
     const checkLogout = ()=>{
       isLogout.value = true
@@ -296,14 +314,44 @@ export default defineComponent({
       popupTitle.value = status.popupTitle
       popupMessage.value = status.popupMessage
     }
+    // 檢查是否有收到google回傳的授權碼
+    const checkGoogleCode = ()=>{
+      let url = new URL(window.location.href)
+      let code = url.searchParams.get('code')
+      if(code != null){
+        api.get(`${API_ENDPOINTS.GET_GOOGLE_TOKEN}?code=${code}`).then((res)=>{
+          if(res.status === 200){
+            vuexStore.commit('module/setLoginStatus', true);
+            vuexStore.commit('module/setJWTToken', res.data.token);
+            vuexStore.commit('module/setUserName', res.data.user_name);
+            popupHandler({
+              popup: true,
+              popupTitle: 'Success',
+              popupMessage: res.data.msg
+            })
+            // 清除網址中的授權碼，避免重新整理時再次發送請求
+            const newURL = window.location.href.split('?')[0];
+            window.history.replaceState({}, document.title, newURL);
+          }
+        }).catch((err)=>{
+          console.log(err)
+          vuexStore.commit('module/setLoginStatus', false);
+          popupHandler({
+            popup: true,
+            popupTitle: 'Error',
+            popupMessage: `${err.response.statusText}-${err.response.data.error}`
+          })
+        })
+      }
+    }
+    // 重新整理監聽
     const beforeUnload = ()=>{
       vuexStore.commit('module/setLocalStorage')
     }
-
     onMounted(() => {
+      checkGoogleCode()
       window.addEventListener('beforeunload', beforeUnload);
     })
-
     onBeforeUnmount(() => {
       window.removeEventListener('beforeunload', beforeUnload);
     })
@@ -324,12 +372,14 @@ export default defineComponent({
       rightDrawerOpen,
       createMember,
       login,
+      loginWithGoogle,
       logout,
       checkLogout,
       clear,
       popupHandler,
       loadingHandler,
       beforeUnload,
+      checkGoogleCode,
       toggleRightDrawer () {
         rightDrawerOpen.value = !rightDrawerOpen.value
       }
