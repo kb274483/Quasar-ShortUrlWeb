@@ -317,9 +317,10 @@ export default defineComponent({
     // 檢查是否有收到google回傳的授權碼
     const checkGoogleCode = ()=>{
       let url = new URL(window.location.href)
+      let state = url.searchParams.get('state')
       let code = url.searchParams.get('code')
       if(code != null){
-        api.get(`${API_ENDPOINTS.GET_GOOGLE_TOKEN}?code=${code}`).then((res)=>{
+        api.get(`${API_ENDPOINTS.GET_GOOGLE_TOKEN}?state=${state}&code=${code}`).then((res)=>{
           if(res.status === 200){
             vuexStore.commit('module/setLoginStatus', true);
             vuexStore.commit('module/setJWTToken', res.data.token);
