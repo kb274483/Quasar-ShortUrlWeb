@@ -8,7 +8,7 @@
         <p class="tw-text-gray-600 tw-text-xl tw-text-center">Your History Record</p>
         <q-list bordered class="tw-rounded tw-shadow-inner tw-mt-4">
           <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200">
-            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-4 tw-place-items-center">
+            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-2 tw-place-items-center">
               <span class="tw-col-span-2 md:tw-col-span-1">Date</span>
               <span class="tw-col-span-3 tw-hidden md:tw-block">Original</span>
               <span>Link</span>
@@ -18,9 +18,9 @@
           <q-item clickable v-ripple class="tw-border-b-2 tw-border-gray-200"
             v-for="item in historyArr" :key="item.ID.S"
           >
-            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-4 tw-place-items-center">
+            <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-2 tw-place-items-center">
               <span class="tw-col-span-2 md:tw-col-span-1">{{item.Date.S}}</span>
-              <span class="break-words tw-w-full tw-text-balance tw-col-span-3 tw-hidden md:tw-block">
+              <span class="break-all tw-w-full tw-text-balance tw-col-span-3 tw-hidden md:tw-block">
                 {{item.Url.S}}
               </span>
               <q-btn color="white" text-color="orange" class="tw-text-lg" target="_blank"
