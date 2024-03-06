@@ -71,16 +71,33 @@ const getHistory = () => {
 const copyUrl = (copyValue) => {
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(`https://brief-url.link/url_api/${copyValue}`).then(()=>{
-      emit('emit-popup', {popupTitle: 'Success', popupMessage: 'Copied to clipboard', popup: true})
+      emit('emit-popup',
+        {
+          popupTitle: 'Success',
+          popupMessage: 'Copied to clipboard',
+          popup: true,
+          popupIconType:0
+        }
+      )
     }).catch((err)=>{
       console.log(err)
       emit('emit-popup',
-        {popupTitle: 'Warning', popupMessage: 'Copy failed，Http does not support', popup: true}
+        {
+          popupTitle: 'Warning', 
+          popupMessage: 'Copy failed，Http does not support', 
+          popup: true,
+          popupIconType:1
+        }
       )
     })
   }else{
     emit('emit-popup', 
-      {popupTitle: 'Warning', popupMessage: 'Copy failed，Http does not support', popup: true}
+      {
+        popupTitle: 'Warning',
+        popupMessage: 'Copy failed，Http does not support', 
+        popup: true,
+        popupIconType:1
+      }
     )
   } 
 }

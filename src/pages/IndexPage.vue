@@ -19,51 +19,45 @@
         </q-slide-transition>
       </div>
     </div>
-    <q-dialog v-model="alert">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6 text-red-4">{{alertTitle}}</div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          {{alertMessage}}
-        </q-card-section>
-        <q-card-actions align="right" @click="clearURLInput()">
-          <q-btn flat label="OK" color="primary" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref ,defineEmits} from 'vue'
 import {useStore} from 'vuex';
 import api from 'src/api/axios';
 import { API_ENDPOINTS } from 'src/api/index';
 
+const emit = defineEmits(['emit-loading','emit-popup']);
 const vuexStore = useStore()
-const alert = ref(false)
-const alertMessage = ref('')
-const alertTitle = ref('')
 const url = ref('')
 const resultUrl = ref('')
 const getResult = ref(false)
 const userName = computed(() => vuexStore.state.module.userName);
+
 // 透過API產生短網址
 const generate = () => {
   if(isValidUrl(url.value)){
+    emit('emit-loading', true)
     api.post(API_ENDPOINTS.GENERATE_SHORTEN_URL,{url:url.value,user:userName.value}
     ).then((res)=>{
       url.value = ''
       resultUrl.value = res.data.short_url
       getResult.value = true
+      emit('emit-loading', false)
     }).catch((err)=>{
       console.log(err)
+      emit('emit-loading', false)
     })
   }else{
-    alertTitle.value = 'Warning'
-    alertMessage.value = 'Please enter a valid URL'
-    alert.value = true
+    emit('emit-popup',
+      {
+        popupTitle: 'Warning',
+        popupMessage: 'Please enter a valid URL',
+        popup: true,
+        popupIconType:1
+      }
+    )
   }
 }
 // 初步檢查輸入的字串是否為網址
@@ -79,19 +73,34 @@ const clearURLInput = () => {
 const copyUrl = () => {
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(resultUrl.value).then(()=>{
-      alertTitle.value = 'Success'
-      alertMessage.value = 'Copied to clipboard'
-      alert.value = true
+      emit('emit-popup',
+        {
+          popupTitle: 'Success',
+          popupMessage: 'Please enter a valid URL',
+          popup: true,
+          popupIconType:0
+        }
+      )
     }).catch((err)=>{
       console.log(err)
-      alertTitle.value = 'Warning'
-      alertMessage.value = 'Copy failed，Http does not support'
-      alert.value = true
+      emit('emit-popup',
+        {
+          popupTitle: 'Warning',
+          popupMessage: 'Copy failed，Http does not support',
+          popup: true,
+          popupIconType:1
+        }
+      )
     })
   }else{
-    alertTitle.value = 'Warning'
-    alertMessage.value = 'Copy failed，Http does not support'
-    alert.value = true
+    emit('emit-popup',
+      {
+        popupTitle: 'Warning',
+        popupMessage: 'Copy failed，Http does not support',
+        popup: true,
+        popupIconType:1
+      }
+    )
   }
   
 }

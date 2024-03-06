@@ -101,9 +101,14 @@
 
     <!-- 訊息框 -->
     <q-dialog v-model="popup">
-      <q-card style="min-width: 350px">
+      <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">{{popupTitle}}</div>
+          <div class="text-h5 text-red-4 tw-flex tw-items-center tw-gap-2">
+            <q-icon name="thumb_up_alt" color="blue" v-if="popupIconType === 0" />
+            <q-icon name="warning" color="orange" v-if="popupIconType === 1" />
+            <q-icon name="error_outline" color="red" v-if="popupIconType === 2" />
+            {{popupTitle}}
+          </div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
@@ -204,7 +209,8 @@ export default defineComponent({
         popupHandler({
           popup: true,
           popupTitle: 'Warning',
-          popupMessage: 'Please enter account and password'
+          popupMessage: 'Please enter account and password',
+          popupIconType: 1
         })
         return
       }
@@ -213,7 +219,8 @@ export default defineComponent({
           popupHandler({
             popup: true,
             popupTitle: 'Success',
-            popupMessage: res.data.msg
+            popupMessage: res.data.msg,
+            popupIconType: 0
           })
           isCreateMemberCtl.value = false
           memberData.value.account = ''
@@ -224,7 +231,8 @@ export default defineComponent({
         popupHandler({
           popup: true,
           popupTitle: 'Error',
-          popupMessage: `${err.response.statusText}-${err.response.data.error}`
+          popupMessage: `${err.response.statusText}-${err.response.data.error}`,
+          popupIconType: 2
         })
       })
     }
@@ -236,7 +244,8 @@ export default defineComponent({
         popupHandler({
           popup: true,
           popupTitle: 'Warning',
-          popupMessage: 'Please enter account and password'
+          popupMessage: 'Please enter account and password',
+          popupIconType: 1
         })
         return
       }
@@ -249,7 +258,8 @@ export default defineComponent({
           popupHandler({
             popup: true,
             popupTitle: 'Success',
-            popupMessage: res.data.msg
+            popupMessage: res.data.msg,
+            popupIconType: 0
           })
         }
       }).catch((err)=>{
@@ -259,7 +269,8 @@ export default defineComponent({
         popupHandler({
           popup: true,
           popupTitle: 'Error',
-          popupMessage: `${err.response.statusText}-${err.response.data.error}`
+          popupMessage: `${err.response.statusText}-${err.response.data.error}`,
+          popupIconType: 2
         })
       })
     }
@@ -272,7 +283,8 @@ export default defineComponent({
         popupHandler({
           popup: true,
           popupTitle: 'Error',
-          popupMessage: `${err.response.statusText}-${err.response.data.error}`
+          popupMessage: `${err.response.statusText}-${err.response.data.error}`,
+          popupIconType: 2
         })
       })
     }
@@ -282,7 +294,8 @@ export default defineComponent({
       popupHandler({
         popup: true,
         popupTitle: 'Warning',
-        popupMessage: 'Are you sure to logout?'
+        popupMessage: 'Are you sure to logout?',
+        popupIconType: 1
       })
     }
     const logout = ()=>{
@@ -305,6 +318,7 @@ export default defineComponent({
     const popup = ref(false)
     const popupMessage = ref('')
     const popupTitle = ref('')
+    const popupIconType = ref(0) // 0:succes, 1:warning, 2:error
     // Loading
     const loadingHandler = (status) => {
       isLoading.value = status
@@ -313,6 +327,7 @@ export default defineComponent({
       popup.value = status.popup
       popupTitle.value = status.popupTitle
       popupMessage.value = status.popupMessage
+      popupIconType.value = status.popupIconType
     }
     // 檢查是否有收到google回傳的授權碼
     const checkGoogleCode = ()=>{
@@ -328,7 +343,8 @@ export default defineComponent({
             popupHandler({
               popup: true,
               popupTitle: 'Success',
-              popupMessage: res.data.msg
+              popupMessage: res.data.msg,
+              popupIconType: 0
             })
             // 清除網址中的授權碼，避免重新整理時再次發送請求
             const newURL = window.location.href.split('?')[0];
@@ -340,7 +356,8 @@ export default defineComponent({
           popupHandler({
             popup: true,
             popupTitle: 'Error',
-            popupMessage: `${err.response.statusText}-${err.response.data.error}`
+            popupMessage: `${err.response.statusText}-${err.response.data.error}`,
+            popupIconType: 2
           })
         })
       }
@@ -363,6 +380,7 @@ export default defineComponent({
       popup,
       popupTitle,
       popupMessage,
+      popupIconType,
       isLoginStatus,
       isLogout,
       isCreateMemberCtl,
