@@ -20,7 +20,7 @@
           >
             <div class="tw-w-full tw-grid tw-grid-cols-4 md:tw-grid-cols-6 tw-gap-4 tw-place-items-center">
               <span class="tw-col-span-2 md:tw-col-span-1">{{item.Date.S}}</span>
-              <span class="tw-w-full tw-text-balance tw-col-span-3 tw-hidden md:tw-block">
+              <span class="break-words tw-w-full tw-text-balance tw-col-span-3 tw-hidden md:tw-block">
                 {{item.Url.S}}
               </span>
               <q-btn color="white" text-color="orange" class="tw-text-lg" target="_blank"
