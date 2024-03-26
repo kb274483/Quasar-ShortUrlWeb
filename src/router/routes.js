@@ -25,6 +25,22 @@ const routes = [
       }
     ]
   },
+  {
+    path: '/schedule',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '',
+        component: () => import('pages/Schedule.vue'),
+        beforeEnter: (to, from, next) => {
+          if (store.state.module.isLoginStatus) {
+            next();
+          } else {
+            next('/'); 
+          }
+        }
+      }
+    ]
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

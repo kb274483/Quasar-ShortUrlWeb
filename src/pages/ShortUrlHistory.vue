@@ -50,7 +50,6 @@ const emit = defineEmits(['emit-loading','emit-popup']);
 const vuexStore = useStore()
 const userName = computed(() => vuexStore.state.module.userName);
 const historyArr = ref([])
-const isLoading = ref(false)
 
 onMounted(() => {
   emit('emit-loading', true)

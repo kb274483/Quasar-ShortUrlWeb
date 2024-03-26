@@ -41,6 +41,14 @@
             unelevated to="/history" label="History" no-caps @click="rightDrawerOpen = false"
           />
         </q-item>
+        <q-item clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon color="deep-orange" name="event_available" />
+          </q-item-section>
+          <q-btn color="white" text-color="orange" class="tw-w-full"
+            unelevated to="/schedule" label="Todo-Schedule" no-caps @click="rightDrawerOpen = false"
+          />
+        </q-item>
       </q-list>
       <q-list bordered v-else>
         <q-item v-ripple>
