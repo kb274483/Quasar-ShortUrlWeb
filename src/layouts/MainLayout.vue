@@ -109,7 +109,7 @@
 
     <!-- 訊息框 -->
     <q-dialog v-model="popup">
-      <q-card style="min-width: 400px">
+      <q-card style="min-width: 350px">
         <q-card-section>
           <div class="text-h5 text-red-4 tw-flex tw-items-center tw-gap-2">
             <q-icon name="thumb_up_alt" color="blue" v-if="popupIconType === 0" />
@@ -128,7 +128,7 @@
           <q-btn flat label="Yes" color="red" @click="logout()" />
         </q-card-actions>
         <q-card-actions align="right" v-else>
-          <q-btn flat label="OK" color="primary" v-close-popup />
+          <q-btn flat label="OK" color="primary" @click="popupControler()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -327,6 +327,7 @@ export default defineComponent({
     const popupMessage = ref('')
     const popupTitle = ref('')
     const popupIconType = ref(0) // 0:succes, 1:warning, 2:error
+    const tokenExpired = ref(false)
     // Loading
     const loadingHandler = (status) => {
       isLoading.value = status
@@ -336,6 +337,9 @@ export default defineComponent({
       popupTitle.value = status.popupTitle
       popupMessage.value = status.popupMessage
       popupIconType.value = status.popupIconType
+      if(status.tokenExpired){
+        tokenExpired.value = status.tokenExpired
+      }
     }
     // 檢查是否有收到google回傳的授權碼
     const checkGoogleCode = ()=>{
@@ -369,6 +373,11 @@ export default defineComponent({
           })
         })
       }
+    }
+
+    const popupControler = ()=>{
+      if(tokenExpired.value) logout()
+      else popup.value = false
     }
     // 重新整理監聽
     const beforeUnload = ()=>{
@@ -407,6 +416,7 @@ export default defineComponent({
       loadingHandler,
       beforeUnload,
       checkGoogleCode,
+      popupControler,
       toggleRightDrawer () {
         rightDrawerOpen.value = !rightDrawerOpen.value
       }

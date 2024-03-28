@@ -64,6 +64,15 @@ const getHistory = () => {
   }).catch((err)=>{
     console.log(err)
     emit('emit-loading', false)
+    emit('emit-popup',
+      {
+        popupTitle: 'Warning', 
+        popupMessage: err.response.data.error, 
+        popup: true,
+        popupIconType:1,
+        tokenExpired:true
+      }
+    )
   })
 }
 // 複製短網址
