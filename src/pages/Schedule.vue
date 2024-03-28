@@ -196,7 +196,14 @@ const getDailyScheduleData = ()=>{
         item.Timestamp = parseInt(item.Timestamp)
         return item
       })
-      scheduleCardArr.value.sort((a,b)=>a.Timestamp - b.Timestamp)
+      // 發現不能依靠時間戳來判斷先後順序，改用時間
+      scheduleCardArr.value.sort((a, b) => {
+        const time2Min = (time) => {
+          const [hr, min] = time.split(':').map(Number);
+          return hr * 60 + min;
+        };
+        return time2Min(a.Time) - time2Min(b.Time);
+      });
     }
     emit('emit-loading', false)
   }).catch((err)=>{
@@ -304,12 +311,12 @@ const clearAddEvent = ()=>{
   isAddEventModel.value = false
   eventObject.value = {
     account:userName.value,
-    timeStamp:"",
+    timestamp:null,
     title:"",
     content:"",
     status:false,
     date:selectedDate.value,
-    time:"",
+    time:"07:00",
     idEdit:false
   }
 }
