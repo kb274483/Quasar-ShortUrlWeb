@@ -108,7 +108,7 @@
     </q-dialog>
 
     <!-- 訊息框 -->
-    <q-dialog v-model="popup">
+    <q-dialog persistent v-model="popup">
       <q-card style="min-width: 350px">
         <q-card-section>
           <div class="text-h5 text-red-4 tw-flex tw-items-center tw-gap-2">

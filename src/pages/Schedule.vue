@@ -71,7 +71,7 @@
       </div>
     </div>
     <!-- 設定事件 -->
-    <q-dialog v-model="isAddEventModel">
+    <q-dialog persistent v-model="isAddEventModel">
       <q-card style="min-width: 350px">
         <q-card-section>
           <div class="text-h6 text-red-5 tw-flex tw-items-center tw-gap-2">
@@ -271,7 +271,7 @@ const eventObject = ref({
   title:"",
   content:"",
   status:false,
-  date:selectedDate.value,
+  date:"",
   time:"07:00",
   idEdit:false
 })
@@ -293,6 +293,7 @@ const addNewEvent = ()=>{
     return;
   }
   eventObject.value.timestamp = Date.now();
+  eventObject.value.date = selectedDate.value
   emit('emit-loading',true)
   api.post(API_ENDPOINTS.ADD_DAILY_SCHEDULE,eventObject.value).then((res)=>{ 
     emit('emit-loading', false)
@@ -312,7 +313,7 @@ const clearAddEvent = ()=>{
     title:"",
     content:"",
     status:false,
-    date:selectedDate.value,
+    date:"",
     time:"07:00",
     idEdit:false
   }
