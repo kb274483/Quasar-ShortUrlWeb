@@ -181,7 +181,6 @@ const onSlideChange = (swiper) => {
 const dataFilterName = ref(['Account','Content','Date','Status','Time','Timestamp','Title'])
 // 取得當日行程資料
 const getDailyScheduleData = ()=>{
-  emit('emit-loading',true)
   api.post(API_ENDPOINTS.GET_DAILY_SCHEDULE,{
     account : userName.value,
     date : selectedDate.value
@@ -205,10 +204,8 @@ const getDailyScheduleData = ()=>{
         return time2Min(a.Time) - time2Min(b.Time);
       });
     }
-    emit('emit-loading', false)
   }).catch((err)=>{
     console.log(err)
-    emit('emit-loading', false)
     emit('emit-popup',
       {
         popupTitle: 'Warning', 
@@ -321,8 +318,67 @@ const clearAddEvent = ()=>{
   }
 }
 
+const checkPermission = ()=>{
+  if('serviceWorker' in navigator && 'Notification' in window) return true
+  else return false
+}
+
+const registerSW = async ()=>{
+  let vapidPubKey = await api.get(API_ENDPOINTS.GET_VAPID_KEY)
+  let unit8VapidKey = urlBase64ToUint8Arr(vapidPubKey.data.publicKey)
+  navigator.serviceWorker.register('../sw.js').then((registration)=>{
+    registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: unit8VapidKey
+    }).then((subscription)=>{
+      let post = {
+        account : userName.value,
+        subscription : Object.assign(subscription)
+      }
+      api.post(API_ENDPOINTS.SUBSCRIBE,post).then((res)=>{
+        localStorage.setItem('subscribe',true)
+        emit('emit-popup',
+          {
+            popupTitle: 'Success', 
+            popupMessage: res.data.msg, 
+            popup: true,
+            popupIconType:0,
+          }
+        )
+      }).catch((err)=>{
+        console.log(err)
+      })
+    }).catch((error)=>{
+      console.log(error)
+    });
+  }).catch((error)=>{
+    console.log('Service Worker', error);
+  });
+}
+
+// 將公鑰轉成Uint8Array格式 為使用PushManager.subscribe()服務時必要的
+const urlBase64ToUint8Arr = (base64String) => {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 onMounted(()=>{
   getDailyScheduleData()
+  if(Notification.permission === 'default' || Notification.permission === 'denied'){
+    localStorage.removeItem('subscribe')
+  }
+  const subscribeStatus = JSON.parse(localStorage.getItem('subscribe')) || false
+  if(checkPermission() && !subscribeStatus) registerSW()
 })
 
 </script>

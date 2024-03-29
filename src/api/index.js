@@ -19,4 +19,8 @@ export const API_ENDPOINTS = {
   UPDATE_DAILY_SCHEDULE : `/update_itinerary`,
   // 刪除行程
   DELETE_DAILY_SCHEDULE : `/delete_itinerary`,
+  // 取得公鑰
+  GET_VAPID_KEY : `/get_vapid_key`,
+  // 訂閱
+  SUBSCRIBE : `/subscribe`,
 };
