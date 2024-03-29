@@ -1,7 +1,7 @@
 <template>
   <q-page class="tw-pt-2 tw-pb-6">
     <!-- 返回 ＆ 日期 -->
-    <div class="tw-grid tw-grid-cols-3 md:tw-grid-cols-5 tw-gap-2">
+    <div class="tw-grid tw-grid-cols-3 md:tw-grid-cols-5 tw-gap-2 tw-max-w-screen-sm tw-mx-auto">
       <q-btn color="white" text-color="orange" class="tw-text-lg"
         unelevated to="/" label="<Back" no-caps
       />
@@ -21,7 +21,7 @@
       </q-btn>
     </div>
     <!-- Swiper -->
-    <div class="tw-w-4/5 tw-mx-auto tw-flex tw-justify-center">
+    <div class="tw-w-4/5 tw-max-w-screen-sm tw-mx-auto tw-flex tw-justify-center">
       <swiper
         ref="swiper"
         centeredSlides
@@ -47,7 +47,7 @@
       </swiper>
     </div>
     <!-- 行程卡片 -->
-    <div class="tw-mx-2 tw-mt-2">
+    <div class="tw-mt-2 tw-max-w-screen-sm tw-mx-auto tw-px-2">
       <Card
         v-for="card in scheduleCardArr" :key="card.Timestamp"
         @updateEdit="updateEdit"
