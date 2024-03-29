@@ -70,7 +70,7 @@
     </q-card>
   </q-slide-item>
   <!-- 刪除確認 -->
-  <q-dialog v-model="popup">
+  <q-dialog persistent v-model="popup">
     <q-card style="min-width: 350px">
       <q-card-section>
         <div class="text-h6 text-red-5 tw-flex tw-items-center tw-gap-2">
