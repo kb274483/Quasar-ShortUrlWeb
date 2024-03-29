@@ -374,9 +374,6 @@ const urlBase64ToUint8Arr = (base64String) => {
 
 onMounted(()=>{
   getDailyScheduleData()
-  if(Notification.permission === 'default' || Notification.permission === 'denied'){
-    localStorage.removeItem('subscribe')
-  }
   const subscribeStatus = JSON.parse(localStorage.getItem('subscribe')) || false
   if(checkPermission() && !subscribeStatus) registerSW()
 })
