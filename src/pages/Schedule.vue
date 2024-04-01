@@ -328,6 +328,7 @@ const registerSW = async ()=>{
   let vapidPubKey = await api.get(API_ENDPOINTS.GET_VAPID_KEY)
   let unit8VapidKey = urlBase64ToUint8Arr(vapidPubKey.data.publicKey)
   navigator.serviceWorker.register('../sw.js').then((registration)=>{
+    emit('emit-loading', true)
     registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: unit8VapidKey
@@ -338,6 +339,7 @@ const registerSW = async ()=>{
       }
       api.post(API_ENDPOINTS.SUBSCRIBE,post).then((res)=>{
         localStorage.setItem('subscribe',true)
+        emit('emit-loading', false)
         emit('emit-popup',
           {
             popupTitle: 'Success', 
@@ -348,12 +350,15 @@ const registerSW = async ()=>{
         )
       }).catch((err)=>{
         console.log(err)
+        emit('emit-loading', false)
       })
     }).catch((error)=>{
       console.log(error)
+      emit('emit-loading', false)      
     });
   }).catch((error)=>{
     console.log('Service Worker', error);
+    emit('emit-loading', false)
   });
 }
 
@@ -375,7 +380,10 @@ const urlBase64ToUint8Arr = (base64String) => {
 
 onMounted(()=>{
   getDailyScheduleData()
-  const subscribeStatus = JSON.parse(localStorage.getItem('subscribe')) || false
+  let subscribeStatus = JSON.parse(localStorage.getItem('subscribe')) || false
+  if(Notification.permission == 'default'){
+    subscribeStatus = false
+  }
   if(checkPermission() && !subscribeStatus) registerSW()
 })
 
