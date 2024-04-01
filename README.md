@@ -26,6 +26,11 @@
 * 密碼：demo123
 * 當然也可以自己建立一個新的
 
+# 似乎跟我想的不太一樣
+新增了一個Todo-Schedule的頁面，一方面是試試看操作DynamoDB的CRUD，又覺得這樣好像有點普通。
+所以試著增加了Service worker獲取通知權限的功能，原本的想法其實是要讓IOS行動裝置可以接收事件發生前的通知，
+但目前發現要讓IOS可以跳出通知這個網頁必須是PWA，所以目前只有在電腦上有接收通知的功能。
+之後有時間再來考慮做成PWA好了。
 # Quasar App (quasat-app)
 
 A Quasar Project
