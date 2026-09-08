@@ -1,11 +1,10 @@
 import Axios from 'axios';
 import initializeStore  from '../store';
-const API_BASE_URL = 'https://brief-url.link/url_api';
-const DEV_API_BASE_URL = 'http://localhost:8080/url_api';
+const API_BASE_URL = '/url_api';
 
 const store = initializeStore();
 const api = Axios.create({
-  baseURL: process.env.DEV ? DEV_API_BASE_URL : API_BASE_URL,
+  baseURL: API_BASE_URL,
 });
 api.interceptors.request.use(
   config => {
