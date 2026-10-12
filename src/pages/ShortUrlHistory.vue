@@ -26,7 +26,7 @@
                 {{item.Url.S}}
               </span>
               <q-btn color="white" text-color="orange" class="tw-text-lg" target="_blank"
-                unelevated :href="`https://brief-url.link/url_api/${item.ID.S}`" 
+                unelevated :href="getShortUrl(item.ID.S)"
                 icon="link"
               />
               <q-btn color="white" text-color="orange" class="tw-text-base"
@@ -75,10 +75,14 @@ const getHistory = () => {
     )
   })
 }
+const getShortUrl = (key) => {
+  return new URL(`/url_api/${encodeURIComponent(key)}`, window.location.origin).href
+}
+
 // 複製短網址
 const copyUrl = (copyValue) => {
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(`https://brief-url.link/url_api/${copyValue}`).then(()=>{
+    navigator.clipboard.writeText(getShortUrl(copyValue)).then(()=>{
       emit('emit-popup',
         {
           popupTitle: 'Success',

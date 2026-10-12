@@ -1,0 +1,114 @@
+name: Frontend CI/CD - Build and deploy to S3
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+# Finish publishing before another run can replace the same index.html.
+concurrency:
+  group: shorturl-web-main
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-northeast-1
+  S3_BUCKET: shorturl-web-320080014524-ap-northeast-1
+  CLOUDFRONT_DISTRIBUTION_ID: E3T2U4O3JYJC2J
+  FRONTEND_URL: https://app.brief-url.link
+  AWS_PAGER: ""
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build-and-deploy:
+    # The OIDC role trusts this repository's main branch only.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build and check frontend output
+        run: |
+          npm run build
+          test -s dist/spa/index.html
+          test -d dist/spa/assets
+
+      - name: Get temporary AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::320080014524:role/ShortUrlGithubS3Upload
+          role-session-name: shorturl-web-${{ github.run_id }}
+          aws-region: ${{ env.AWS_REGION }}
+          allowed-account-ids: "320080014524"
+
+      - name: Upload hashed assets
+        run: |
+          # Keep previous hashed assets available for browsers using older HTML.
+          aws s3 cp dist/spa/assets/ "s3://$S3_BUCKET/assets/" \
+            --recursive --no-follow-symlinks --only-show-errors \
+            --cache-control 'public,max-age=31536000,immutable'
+
+      - name: Upload other static files
+        run: |
+          aws s3 cp dist/spa/ "s3://$S3_BUCKET/" \
+            --recursive --no-follow-symlinks --only-show-errors \
+            --exclude 'assets/*' --exclude 'index.html' \
+            --cache-control 'no-cache,max-age=0,must-revalidate'
+
+      - name: Publish index.html last
+        run: |
+          aws s3 cp dist/spa/index.html "s3://$S3_BUCKET/index.html" \
+            --only-show-errors \
+            --content-type 'text/html; charset=utf-8' \
+            --cache-control 'no-cache,max-age=0,must-revalidate'
+
+      - name: Refresh CloudFront cache and wait
+        timeout-minutes: 12
+        run: |
+          invalidation_id="$(aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths '/*' --query 'Invalidation.Id' --output text)"
+
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --id "$invalidation_id"
+
+      - name: Verify deployed frontend and API entry
+        run: |
+          curl --fail --silent --show-error --compressed \
+            --retry 5 --retry-delay 5 --retry-connrefused \
+            --connect-timeout 5 --max-time 30 \
+            "$FRONTEND_URL/" --output "$RUNNER_TEMP/deployed-index.html"
+
+          if ! cmp -s dist/spa/index.html "$RUNNER_TEMP/deployed-index.html"; then
+            echo '::error::CloudFront did not serve the index.html built by this run.'
+            exit 1
+          fi
+
+          curl --fail --silent --show-error \
+            --retry 5 --retry-delay 5 --retry-connrefused \
+            --connect-timeout 5 --max-time 30 \
+            "$FRONTEND_URL/url_api/healthz" | jq -e '.status == "ok"'
+
+          printf 'Deployed commit: `%s`\nSite: %s\nHomepage and API health check: passed\n' \
+            "$GITHUB_SHA" "$FRONTEND_URL" >> "$GITHUB_STEP_SUMMARY"
