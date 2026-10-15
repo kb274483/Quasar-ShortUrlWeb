@@ -95,20 +95,23 @@ jobs:
 
       - name: Verify deployed frontend and API entry
         run: |
-          curl --fail --silent --show-error --compressed \
-            --retry 5 --retry-delay 5 --retry-connrefused \
-            --connect-timeout 5 --max-time 30 \
-            "$FRONTEND_URL/" --output "$RUNNER_TEMP/deployed-index.html"
+          # Request Vue history routes directly to catch refresh/deep-link failures.
+          for route in / /history /history/ /schedule /schedule/; do
+            curl --fail --silent --show-error --compressed \
+              --retry 5 --retry-delay 5 --retry-connrefused \
+              --connect-timeout 5 --max-time 30 \
+              "$FRONTEND_URL$route" --output "$RUNNER_TEMP/deployed-index.html"
 
-          if ! cmp -s dist/spa/index.html "$RUNNER_TEMP/deployed-index.html"; then
-            echo '::error::CloudFront did not serve the index.html built by this run.'
-            exit 1
-          fi
+            if ! cmp -s dist/spa/index.html "$RUNNER_TEMP/deployed-index.html"; then
+              echo "::error::CloudFront did not serve this build's index.html for $route."
+              exit 1
+            fi
+          done
 
           curl --fail --silent --show-error \
             --retry 5 --retry-delay 5 --retry-connrefused \
             --connect-timeout 5 --max-time 30 \
             "$FRONTEND_URL/url_api/healthz" | jq -e '.status == "ok"'
 
-          printf 'Deployed commit: `%s`\nSite: %s\nHomepage and API health check: passed\n' \
+          printf 'Deployed commit: `%s`\nSite: %s\nHomepage, history/schedule deep links and API health check: passed\n' \
             "$GITHUB_SHA" "$FRONTEND_URL" >> "$GITHUB_STEP_SUMMARY"
